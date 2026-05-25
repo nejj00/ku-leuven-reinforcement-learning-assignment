@@ -1,0 +1,8 @@
+fpdf2
+gymnasium
+matplotlib
+minihack
+nle
+numpy
+pytest
+torch
