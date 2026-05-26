@@ -67,7 +67,10 @@ class TabularMinihackAgent(AbstractAgent):
         # TODO: Implement epsilon-greedy action selection.
 
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        if random.random() < self.epsilon:
+            return self.action_space.sample()
+        else:
+            return int(np.argmax(self.q_table[state]))
         # ### END OF YOUR SOLUTION
 
     def update_epsilon(self, episode):
@@ -76,5 +79,8 @@ class TabularMinihackAgent(AbstractAgent):
         # TODO: Implement the linear epsilon decay schedule.
 
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        if  episode < self.epsilon_decay_episodes:
+            self.epsilon = self.epsilon_start - ((episode + 1) * ((self.epsilon_start - self.epsilon_end) / self.epsilon_decay_episodes))
+        else:
+            self.epsilon = self.epsilon_end
         # ### END OF YOUR SOLUTION

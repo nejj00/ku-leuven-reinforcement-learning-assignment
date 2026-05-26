@@ -1,0 +1,5 @@
+import test1
+import test2
+
+test1.test_minihack_cliff_hardcoded_agent_finishes_safely()
+# test2.test_mc_agent_act_buffers_transitions_and_does_not_learn_during_episode()

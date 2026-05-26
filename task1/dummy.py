@@ -44,7 +44,8 @@ class GridWorldEnv(gym.Env):
 
         # TODO: Initialize the environment state.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        self.agent_pos = (0, 0)
+        self.goal_pos = (self.n - 1, self.m - 1)
         # ### END OF YOUR SOLUTION
 
     def reset(self, *, seed: int | None = None, options: dict | None = None):
@@ -56,7 +57,14 @@ class GridWorldEnv(gym.Env):
         """
         # TODO: Implement reset.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        super().reset(seed=seed)
+        
+        self.agent_pos = (0, 0)
+        
+        observation = self.agent_pos
+        info = {}
+        
+        return observation, info
         # ### END OF YOUR SOLUTION
 
     def step(self, action):
@@ -75,7 +83,26 @@ class GridWorldEnv(gym.Env):
         """
         # TODO: Implement the transition dynamics.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        direction = {
+            0: (-1, 0),  # up
+            1: (1, 0),   # down
+            2: (0, 1),   # right
+            3: (0, -1)    # left
+        }
+        
+        move = direction.get(action, (0, 0))
+        new_pos = (self.agent_pos[0] + move[0], self.agent_pos[1] + move[1])
+
+        if 0 <= new_pos[0] < self.n and 0 <= new_pos[1] < self.m:
+            self.agent_pos = new_pos
+        
+        observation = self.agent_pos        
+        reward = -1
+        terminated = self.agent_pos == self.goal_pos
+        truncated = False
+        info = {}
+        
+        return observation, reward, terminated, truncated, info
         # ### END OF YOUR SOLUTION
 
     def render(self):
@@ -87,7 +114,19 @@ class GridWorldEnv(gym.Env):
         """
         # TODO: Implement render.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        grid = ""
+        
+        for i in range(self.n):
+            for j in range(self.m):
+                if (i, j) == self.agent_pos:
+                    grid += "A"
+                elif (i, j) == self.goal_pos:
+                    grid += "G"
+                else:
+                    grid += "."
+            grid += "\n"
+            
+        return grid
         # ### END OF YOUR SOLUTION
 
 
@@ -155,7 +194,9 @@ class SlipperyGridWorldEnv(gym.Env):
 
         # TODO: Initialize the environment state.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        self.agent_pos = (0, 0)
+        self.goal_pos = (self.n - 1, self.m - 1)
+        self.np_random = np.random.RandomState()
         # ### END OF YOUR SOLUTION
 
     def reset(self, *, seed: int | None = None, options: dict | None = None):
@@ -170,7 +211,17 @@ class SlipperyGridWorldEnv(gym.Env):
         """
         # TODO: Implement reset.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        if options and "start_pos" in options:
+            self.agent_pos = options["start_pos"]
+        else:
+            self.agent_pos = (0, 0)
+
+        self.np_random = np.random.RandomState(seed)
+                    
+        observation = self.agent_pos
+        info = {}
+        
+        return observation, info
         # ### END OF YOUR SOLUTION
 
     def step(self, action):
@@ -191,7 +242,42 @@ class SlipperyGridWorldEnv(gym.Env):
         """
         # TODO: Implement the stochastic transition dynamics.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        direction = {
+            0: (-1, 0),  # up
+            1: (1, 0),   # down
+            2: (0, 1),   # right
+            3: (0, -1)    # left
+        }
+        
+        left_turn = {
+            0: 3,  # up -> left
+            1: 2,  # down -> right
+            2: 0,  # right -> up
+            3: 1   # left -> down
+        }
+        
+        right_turn = {
+            0: 2,  # up -> right
+            1: 3,  # down -> left
+            2: 1,  # right -> down
+            3: 0   # left -> up
+        }
+        
+        executed_action = self.np_random.choice([action, left_turn[action], right_turn[action]], p=[self.p_success, (1 - self.p_success) / 2, (1 - self.p_success) / 2])
+        move = direction.get(executed_action, (0, 0))
+        
+        new_pos = (self.agent_pos[0] + move[0], self.agent_pos[1] + move[1])
+
+        if 0 <= new_pos[0] < self.n and 0 <= new_pos[1] < self.m:
+            self.agent_pos = new_pos
+        
+        observation = self.agent_pos        
+        reward = -1
+        terminated = self.agent_pos == self.goal_pos
+        truncated = False
+        info = {}
+        
+        return observation, reward, terminated, truncated, info
         # ### END OF YOUR SOLUTION
 
     def render(self):
@@ -203,7 +289,19 @@ class SlipperyGridWorldEnv(gym.Env):
         """
         # TODO: Implement render.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        grid = ""
+        
+        for i in range(self.n):
+            for j in range(self.m):
+                if (i, j) == self.agent_pos:
+                    grid += "A"
+                elif (i, j) == self.goal_pos:
+                    grid += "G"
+                else:
+                    grid += "."
+            grid += "\n"
+            
+        return grid
         # ### END OF YOUR SOLUTION
 
 
@@ -229,7 +327,14 @@ class GridWorldHardCodedAgent(AbstractAgent):
     def act(self, state, reward=0, **kwargs):
         # TODO: Implement the hardcoded policy.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        row, col = state
+        goal_row, goal_col = self.goal_pos
+        if row < goal_row:
+            return 1
+        elif col < goal_col:
+            return 2
+        else:
+            return 0        
         # ### END OF YOUR SOLUTION
 
 # TASK 1.4: Implement a scripted MiniHack agent for the empty room environment.
@@ -250,13 +355,21 @@ class MiniHackEmptyHardCodedAgent(AbstractAgent):
 
         # TODO: Initialize any state needed by act().
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        self.agent_pos = (0, 0)
         # ### END OF YOUR SOLUTION
 
     def act(self, state, reward=0, **kwargs):
         # TODO: Implement a policy that navigates to the goal.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        chars = state["chars"]
+        self.agent_pos = np.argwhere(chars == ord('@'))[0]
+        
+        if chars[self.agent_pos[0]][self.agent_pos[1] + 1] != ord('|'):
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.E)
+        elif chars[self.agent_pos[0] + 1][self.agent_pos[1]] != ord('-'):
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.S)
+        else:
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.N)
         # ### END OF YOUR SOLUTION
 
 
@@ -278,13 +391,24 @@ class MiniHackCliffHardCodedAgent(AbstractAgent):
 
         # TODO: Initialize any state needed by act().
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        self.agent_pos = (0, 0)
         # ### END OF YOUR SOLUTION
 
     def act(self, state, reward=0, **kwargs):
         # TODO: Implement a policy that navigates to the goal while avoiding hazards.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        chars = state["chars"]
+        print(f"State chars: {chars}")
+        self.agent_pos = np.argwhere(chars == ord('@'))[0]
+        
+        if chars[self.agent_pos[0]][self.agent_pos[1] + 1] == ord('L'):
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.N)
+        elif chars[self.agent_pos[0]][self.agent_pos[1] + 1] != ord('|'):
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.E)
+        elif chars[self.agent_pos[0] + 1][self.agent_pos[1]] != ord('-'):
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.S)
+        else:
+            return me.ACTIONS.index(nethack.CompassCardinalDirection.N)
         # ### END OF YOUR SOLUTION
 
 
@@ -322,7 +446,28 @@ class AbstractRLTask:
         """
         # TODO: Implement the interaction loop.
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        episode_returns = []
+        for episode in range(n_episodes):
+            state, info = self.env.reset()
+            episode_return = 0
+            step = 0
+            terminated = False
+            truncated = False
+            
+            while not terminated and not truncated:
+                action = self.agent.act(state, reward=episode_return, step=step)
+                next_state, reward, terminated, truncated, info = self.env.step(action)
+                episode_return += reward
+                state = next_state
+                step += 1
+                
+                if max_steps_per_episode is not None and step >= max_steps_per_episode:
+                    truncated = True
+            
+            self.agent.onEpisodeEnd(state, action, episode_return, episode)
+            episode_returns.append(episode_return)
+        
+        return episode_returns
         # ### END OF YOUR SOLUTION
 
 

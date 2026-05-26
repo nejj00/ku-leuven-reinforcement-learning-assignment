@@ -59,13 +59,13 @@ def parse_args():
     parser.add_argument("--algorithm", default="q_learning", choices=ALGORITHMS, help="Tabular RL algorithm to train.")
 
     # CHANGE TO TUNE HYPERPARAMETERS
-    parser.add_argument("--episodes", type=int, default=0, help="Number of training episodes.")
-    parser.add_argument("--alpha", type=float, default=0, help="Learning rate.")
-    parser.add_argument("--epsilon", type=float, default=0, help="Exploration rate.")
+    parser.add_argument("--episodes", type=int, default=15000, help="Number of training episodes.")
+    parser.add_argument("--alpha", type=float, default=0.01, help="Learning rate.")
+    parser.add_argument("--epsilon", type=float, default=1.0, help="Exploration rate.")
     # NOTE: --epsilon-schedule is False by default. It becomes True only if you pass --epsilon-schedule on the command line, which enables linear epsilon decay over episodes (if implemented).
     parser.add_argument("--epsilon-schedule", action="store_true", help="Enable linear epsilon decay over episodes.")
-    parser.add_argument("--epsilon-end", type=float, default=0, help="Minimum epsilon value reached by the linear decay schedule.",)
-    parser.add_argument("--epsilon-decay-episodes", type=int, default=0, help="Number of episodes used by the linear epsilon decay schedule.",)
+    parser.add_argument("--epsilon-end", type=float, default=0.2, help="Minimum epsilon value reached by the linear decay schedule.",)
+    parser.add_argument("--epsilon-decay-episodes", type=int, default=12000, help="Number of episodes used by the linear epsilon decay schedule.",)
     parser.add_argument("--initialization-value", type=float, default=0.0, help="Initial Q-value for unseen states.")
     # END "CHANGE TO TUNE HYPERPARAMETERS"
 
