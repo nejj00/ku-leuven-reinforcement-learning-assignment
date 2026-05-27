@@ -291,7 +291,9 @@ class PPOTask(DeepRLTask):
                 
             # TODO: Compute the GAE advantage estimate for step t.
             # ### YOUR SOLUTION STARTS HERE
-            raise NotImplementedError()
+            delta = rewards[t] + self.agent.gamma * next_values * next_non_terminal - values[t]
+            advantages[t] = delta + self.agent.gamma * self.agent.gae_lambda * next_non_terminal * last_gae
+            last_gae = advantages[t]
             # ### END OF YOUR SOLUTION
 
         returns = advantages + values
@@ -322,8 +324,8 @@ class PPOTask(DeepRLTask):
                 ratio = log_ratio.exp()
     
                 # TODO: compute the PPO clipped objective loss
-                # ### YOUR SOLUTION STARTS HERE 
-                raise NotImplementedError()
+                # ### YOUR SOLUTION STARTS HERE
+                policy_loss = -torch.min(ratio * mb_advantages, torch.clamp(ratio, 1 - self.agent.clip_coef, 1 + self.agent.clip_coef) * mb_advantages).mean()
                 # ### END OF YOUR SOLUTION
 
                 if self.agent.clip_vloss:

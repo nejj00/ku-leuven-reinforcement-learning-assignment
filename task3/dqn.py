@@ -21,7 +21,18 @@ class DQNAgent(DeepMinihackAgent):
 
         # TODO: compute the DQN loss 
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        print(f"Batch: {batch}")
+        states = batch["states"]
+        actions = batch["actions"]
+        rewards = batch["rewards"]
+        next_states = batch["next_states"]
+        dones = batch["dones"]
+        
+        q_values = self.q_network(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        with torch.no_grad():
+            next_q_values = self.target_network(next_states).max(1)[0]
+            target_q_values = rewards + (1 - dones) * self.gamma * next_q_values
+        loss = F.mse_loss(q_values, target_q_values)
         # ### END OF YOUR SOLUTION
 
         self.optimizer.zero_grad()

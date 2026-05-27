@@ -341,7 +341,8 @@ class DeepMinihackAgent(BaseDeepMinihackAgent):
     def update_target_network(self):
         # TODO: implement soft updates of the target network parameters 
         # ### YOUR SOLUTION STARTS HERE
-        raise NotImplementedError()
+        for target_param, param in zip(self.target_network.parameters(), self.q_network.parameters()):
+            target_param.data.copy_(self.tau * param.data + (1 - self.tau) * target_param.data)
         # ### END OF YOUR SOLUTION
 
 class DeepRLTask(AbstractRLTask):
