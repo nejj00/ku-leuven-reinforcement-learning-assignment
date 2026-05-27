@@ -31,9 +31,11 @@ class TDAgent(TabularMinihackAgent):
         encoded_state = self.state_encoder(args[0])
         action = args[1]
         reward = args[2]
-        print(f"State: {encoded_state}, Action: {action}, Reward: {reward}")
+        episode = args[3]
         
         self.learn(self.last_state, self.last_action, encoded_state, action, reward)
+        
+        self.update_epsilon(episode)
         
         self.last_state = None
         self.last_action = None
@@ -51,7 +53,7 @@ class QLearning(TDAgent):
         # TODO: Implement epsilon-greedy action selection, disabling exploration when not learning.
 
         # ### YOUR SOLUTION STARTS HERE
-        if self.learning and random.random() < self.epsilon:
+        if self.learning and random.uniform(0, 1) < self.epsilon:
             return self.action_space.sample()
         else:
             return int(np.argmax(self.q_table[state]))

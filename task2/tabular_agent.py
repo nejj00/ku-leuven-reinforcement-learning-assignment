@@ -67,7 +67,7 @@ class TabularMinihackAgent(AbstractAgent):
         # TODO: Implement epsilon-greedy action selection.
 
         # ### YOUR SOLUTION STARTS HERE
-        if random.random() < self.epsilon:
+        if random.uniform(0, 1) < self.epsilon:
             return self.action_space.sample()
         else:
             return int(np.argmax(self.q_table[state]))
