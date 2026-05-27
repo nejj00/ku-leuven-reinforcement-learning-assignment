@@ -28,7 +28,7 @@ For any other script, you can run:
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=monte_carlo --env=empty-room --episodes=2000 --epsilon=0.8
+--algorithm=monte_carlo --env=empty-room --episodes=200 --epsilon=0.8
 ```
 
 #### Cliff
@@ -42,7 +42,7 @@ docker compose run --rm py python train/train_tabular.py \
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=monte_carlo --env=room-with-monster --episodes=10000 --epsilon=0.5 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=8000
+--algorithm=monte_carlo --env=room-with-monster --episodes=15000 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=12000
 ```
 
 ### Sarsa
@@ -51,35 +51,22 @@ docker compose run --rm py python train/train_tabular.py \
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=sarsa --env=empty-room --episodes=5000 --alpha=0.25 --epsilon=0.8
+--algorithm=sarsa --env=empty-room --episodes=200 --alpha=0.25 --epsilon=0.8
 ```
 
 #### Cliff
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=sarsa --env=cliff-minihack --episodes=10000 --alpha=0.05 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=8000
+--algorithm=sarsa --env=cliff-minihack --episodes=10000 --alpha=0.1 --epsilon=0.5 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=8000
 ```
 
 #### Monster
 
-Both of these pass:
-
 ```bash
-# docker compose run --rm py python train/train_tabular.py \
-# --algorithm=sarsa --env=room-with-monster --episodes=15000 --alpha=0.25 --epsilon=0.8
-
-# not very consistent passing
-docker compose run --rm py python train/train_tabular.py \
---algorithm=sarsa --env=room-with-monster --episodes=15000 --alpha=0.5 --epsilon=0.5
-
 # a bit more consistent
 docker compose run --rm py python train/train_tabular.py \
---algorithm=sarsa --env=room-with-monster --episodes=10000 --alpha=0.01 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=8000
-
-# very consistent
-docker compose run --rm py python train/train_tabular.py \
---algorithm=sarsa --env=room-with-monster --episodes=15000 --alpha=0.01 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=12000
+--algorithm=sarsa --env=room-with-monster --episodes=2000 --alpha=0.1 --epsilon=1.0 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=1000
 ```
 
 ### Q-Learning
@@ -88,19 +75,133 @@ docker compose run --rm py python train/train_tabular.py \
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=q_learning --env=empty-room --episodes=5000 --alpha=0.25 --epsilon=0.8
+--algorithm=q_learning --env=empty-room --episodes=200 --alpha=0.25 --epsilon=0.8
 ```
 
 #### Cliff
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=q_learning --env=cliff-minihack --episodes=15000 --alpha=0.05 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=12000
+--algorithm=q_learning --env=cliff-minihack --episodes=10000 --alpha=0.1 --epsilon=0.5 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=8000
 ```
 
 #### Monster
 
 ```bash
 docker compose run --rm py python train/train_tabular.py \
---algorithm=q_learning --env=room-with-monster --episodes=15000 --alpha=0.01 --epsilon=0.6 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=12000
+--algorithm=q_learning --env=room-with-monster --episodes=2000 --alpha=0.1 --epsilon=1.0 --epsilon-schedule --epsilon-end=0.01 --epsilon-decay-episodes=1500
+```
+
+```bash
+# test
+docker compose run --rm py pytest -vv tests/test2.py::test_q_learning_improves_on_room_with_monster
+```
+
+### DQN
+
+
+#### Empty room
+
+```bash
+# this works
+docker compose run --rm py python train/train_dqn.py \
+  --env=empty-room \
+  --episodes=3000 \
+  --learning-rate=0.001 \
+  --epsilon-start=1.0 \
+  --epsilon-end=0.05 \
+  --epsilon-decay-steps=50000 \
+  --batch-size=64 \
+  --buffer-size=10000 \
+  --learning-starts=500 \
+  --train-frequency=4 \
+  --target-network-frequency=500 \
+  --tau=1.0
+```
+
+#### Cliff
+
+```bash
+# this works
+docker compose run --rm py python train/train_dqn.py \
+  --env=cliff-minihack \
+  --episodes=10000 \
+  --learning-rate=0.001 \
+  --epsilon-start=1.0 \
+  --epsilon-end=0.05 \
+  --epsilon-decay-steps=100000 \
+  --batch-size=64 \
+  --buffer-size=10000 \
+  --learning-starts=500 \
+  --train-frequency=4 \
+  --target-network-frequency=500 \
+  --tau=1.0
+```
+
+#### Monster
+
+```bash
+docker compose run --rm py python train/train_dqn.py \
+  --env=room-with-monster \
+  --episodes=10000 \
+  --learning-rate=0.001 \
+  --epsilon-start=1.0 \
+  --epsilon-end=0.05 \
+  --epsilon-decay-steps=100000 \
+  --batch-size=64 \
+  --buffer-size=10000 \
+  --learning-starts=500 \
+  --train-frequency=4 \
+  --target-network-frequency=500 \
+  --tau=1.0
+```
+
+### PPO
+
+#### Empty room 
+
+```bash
+docker compose run --rm py python train/train_ppo.py \
+--env=empty-room \
+--episodes=100 \
+--learning-rate=0.001 \
+--gae-lambda=0.95 \
+--clip-coef=0.2 \
+--num-steps=128 \
+--num-minibatches=4 \
+--update-epochs=4 \
+--ent-coef=0.01 \
+--vf-coef=0.5
+```
+
+#### Cliff
+
+```bash
+docker compose run --rm py python train/train_ppo.py \
+--env=cliff-minihack \
+--episodes=500 \
+--learning-rate=0.001 \
+--gae-lambda=0.97 \
+--clip-coef=0.2 \
+--num-steps=128 \
+--num-minibatches=4 \
+--update-epochs=4 \
+--ent-coef=0.03 \
+--vf-coef=0.5
+```
+
+#### Monster
+
+```bash
+docker compose run --rm py python train/train_ppo.py \
+--env=room-with-monster \
+--episodes=1000 \
+--learning-rate=0.001 \
+--gae-lambda=0.97 \
+--clip-coef=0.2 \
+--num-steps=128 \
+--num-minibatches=4 \
+--update-epochs=4 \
+--ent-coef=0.04 \
+--vf-coef=0.5
 ```
